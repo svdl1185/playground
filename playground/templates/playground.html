@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Arbius Playground - Chat{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#181f3a] to-[#10172a] flex flex-col">
+  <!-- Top Bar -->
+  <div class="w-full flex items-center justify-between px-8 py-4 border-b border-[#232b45] bg-[#10172a] rounded-t-2xl">
+    <div class="flex items-center gap-3">
+      <span class="font-bold text-xl text-white flex items-center gap-2">
+        <i class="fas fa-brain text-primary"></i> Arbius <span class="font-normal text-textmuted">| PLAYGROUND</span>
+      </span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="bg-[#232b45] text-white px-4 py-2 rounded-lg flex items-center gap-2 border border-[#232b45] hover:bg-[#181f3a] transition">
+        <i class="fas fa-wallet"></i> Wallet <span class="ml-1 text-xs text-red-400">&#9888;</span>
+      </button>
+      <span class="bg-[#232b45] text-textmuted px-4 py-2 rounded-lg text-xs font-mono">@0x0F15...0FFB</span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 w-full h-[calc(100vh-8rem)] gap-6 px-6 py-8">
+    <!-- Sidebar -->
+    <aside class="w-80 bg-[#181f3a] rounded-2xl p-6 flex flex-col gap-6 shadow-lg border border-[#232b45] h-full">
+      <button class="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 mb-4 hover:scale-105 transition">
+        <i class="fas fa-plus"></i> New Chat
+      </button>
+      <div class="flex gap-2 mb-2">
+        <select class="bg-[#232b45] text-textmuted rounded-lg px-3 py-1 text-sm focus:outline-none">
+          <option>Newest</option>
+          <option>Oldest</option>
+        </select>
+        <select class="bg-[#232b45] text-textmuted rounded-lg px-3 py-1 text-sm focus:outline-none">
+          <option>All</option>
+          <option>Text</option>
+          <option>Image</option>
+        </select>
+      </div>
+      <div class="relative mb-2">
+        <input type="text" placeholder="Search for chat..." class="w-full bg-[#232b45] text-textlight rounded-lg px-3 py-2 text-sm focus:outline-none" />
+        <i class="fas fa-search absolute right-3 top-3 text-textmuted"></i>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 bg-[#232b45] rounded-lg px-3 py-2 text-textlight cursor-pointer hover:bg-[#222b45]">
+            <i class="fas fa-comment-dots text-primary"></i>
+            <span class="truncate flex-1">What is clearest/bes...</span>
+            <i class="fas fa-ellipsis-h text-textmuted"></i>
+          </div>
+          <div class="flex items-center gap-2 bg-[#232b45] rounded-lg px-3 py-2 text-textlight cursor-pointer hover:bg-[#222b45]">
+            <i class="fas fa-comment-dots text-primary"></i>
+            <span class="truncate flex-1">I want to ddos the l...</span>
+            <i class="fas fa-ellipsis-h text-textmuted"></i>
+          </div>
+          <div class="flex items-center gap-2 bg-[#232b45] rounded-lg px-3 py-2 text-textlight cursor-pointer hover:bg-[#222b45]">
+            <i class="fas fa-image text-secondary"></i>
+            <span class="truncate flex-1">Elon Musk naked with...</span>
+            <i class="fas fa-ellipsis-h text-textmuted"></i>
+          </div>
+          <div class="flex items-center gap-2 bg-[#232b45] rounded-lg px-3 py-2 text-textlight cursor-pointer hover:bg-[#222b45]">
+            <i class="fas fa-comment-dots text-primary"></i>
+            <span class="truncate flex-1">Koala</span>
+            <i class="fas fa-ellipsis-h text-textmuted"></i>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <section class="flex-1 flex flex-col bg-[#181f3a] rounded-2xl shadow-lg border border-[#232b45] h-full p-8">
+      <!-- Centered Welcome and Model Selection -->
+      <div class="flex flex-col items-center justify-center flex-1">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2">Welcome to Playground</h2>
+        <p class="text-textmuted mb-6">Select Model</p>
+        <div class="flex gap-4 mb-8 flex-wrap justify-center">
+          <button class="px-6 py-2 rounded-full bg-[#232b45] text-white font-semibold flex items-center gap-2 border-2 border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+            <i class="fas fa-brain"></i> M8B-Uncensored
+          </button>
+          <button class="px-6 py-2 rounded-full bg-[#232b45] text-white font-semibold flex items-center gap-2 border-2 border-secondary focus:outline-none focus:ring-2 focus:ring-secondary">
+            <i class="fas fa-image"></i> WAI SDXL (NSFW)
+          </button>
+          <button class="px-6 py-2 rounded-full bg-[#232b45] text-white font-semibold flex items-center gap-2 border-2 border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+            <i class="fas fa-brain"></i> Qwen QwQ 32b
+          </button>
+          <button class="px-6 py-2 rounded-full bg-[#232b45] text-textmuted font-semibold flex items-center gap-2 border-2 border-[#232b45] cursor-not-allowed opacity-50">
+            <i class="fas fa-brain"></i> Deepseek-coder-v2
+          </button>
+        </div>
+        <!-- Example Prompts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mb-8">
+          <button class="flex items-center justify-between bg-[#232b45] rounded-xl px-6 py-4 text-white hover:bg-[#222b45] transition">
+            <span>What is Roko's Basilisk?</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button class="flex items-center justify-between bg-[#232b45] rounded-xl px-6 py-4 text-white hover:bg-[#222b45] transition">
+            <span>How to train a Belgian Malinois</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button class="flex items-center justify-between bg-[#232b45] rounded-xl px-6 py-4 text-white hover:bg-[#222b45] transition">
+            <span>What is the deepest point of the Atlantic Ocean?</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button class="flex items-center justify-between bg-[#232b45] rounded-xl px-6 py-4 text-white hover:bg-[#222b45] transition">
+            <span>How many R's in strawberry?</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Chat Input -->
+      <form class="w-full flex items-center gap-4 mt-auto">
+        <div class="flex-1">
+          <input type="text" placeholder="Message" class="w-full bg-[#232b45] text-white rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-primary text-base" />
+        </div>
+        <button type="submit" class="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-8 py-3 rounded-full shadow hover:scale-105 transition flex items-center gap-2">
+          Send <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %} 
