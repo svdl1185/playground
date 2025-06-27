@@ -31,7 +31,7 @@
 </head>
 <body class="bg-darkbg text-textlight font-sans min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="w-full bg-[#10172a] bg-opacity-95 border-b border-[#1e293b] fixed top-0 z-50">
+    <nav class="w-full bg-darkbg border-b border-[#1e293b] fixed top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <div class="flex items-center gap-2">
                 <a href="{% url 'home' %}" class="flex items-center gap-2 font-bold text-xl text-white">
@@ -40,17 +40,13 @@
                 </a>
                 <div class="hidden md:flex gap-6 ml-8">
                     <a href="{% url 'playground' %}" class="text-textmuted hover:text-white transition">Playground</a>
-                    <a href="#" class="text-textmuted hover:text-white transition">Amica</a>
-                    <a href="#" class="text-textmuted hover:text-white transition">Models</a>
-                    <a href="#" class="text-textmuted hover:text-white transition">Docs</a>
-                    <a href="#" class="text-textmuted hover:text-white transition">Bridge</a>
-                    <a href="#" class="text-textmuted hover:text-white transition">Media</a>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button class="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-4 py-2 rounded-lg shadow hover:scale-105 transition flex items-center gap-2">
-                    <i class="fas fa-wallet"></i> Connect Wallet
+            <div class="flex items-center gap-4">
+                <button class="bg-[#232b45] text-white px-4 py-2 rounded-lg flex items-center gap-2 border border-[#232b45] hover:bg-[#181f3a] transition">
+                    <i class="fas fa-wallet"></i> Wallet <span class="ml-1 text-xs text-red-400">&#9888;</span>
                 </button>
+                <span class="bg-[#232b45] text-textmuted px-4 py-2 rounded-lg text-xs font-mono">@0x0F15...0FFB</span>
             </div>
         </div>
     </nav>
@@ -58,7 +54,7 @@
         {% block content %}{% endblock %}
     </main>
     <!-- Footer -->
-    <footer class="bg-cardbg border-t border-[#1e293b] py-10 mt-10">
+    <footer class="bg-darkbg border-t border-[#1e293b] py-10 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
             <div>
                 <h5 class="text-lg font-bold mb-2">Arbius</h5>
@@ -68,8 +64,6 @@
                 <div>
                     <h6 class="font-semibold mb-2">Resources</h6>
                     <ul class="space-y-1">
-                        <li><a href="#" class="text-textmuted hover:text-white">Docs</a></li>
-                        <li><a href="#" class="text-textmuted hover:text-white">Models</a></li>
                         <li><a href="#" class="text-textmuted hover:text-white">Blog</a></li>
                         <li><a href="#" class="text-textmuted hover:text-white">veAIUS</a></li>
                     </ul>

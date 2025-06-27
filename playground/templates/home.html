@@ -3,166 +3,205 @@
 {% block title %}Arbius - Peer-to-peer Machine Learning{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="w-full min-h-[70vh] flex items-center justify-center bg-gradient-to-b from-[#181f3a] to-[#10172a] relative overflow-hidden">
-  <div class="max-w-6xl w-full flex flex-col md:flex-row items-center gap-16 py-20 px-4">
-    <!-- Left: Text -->
-    <div class="flex-1 flex flex-col items-start justify-center">
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-white leading-tight">
-        Welcome to <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Arbius!</span>
-      </h1>
-      <h2 class="text-xl md:text-2xl font-medium text-textmuted mb-4">Peer-to-peer machine learning</h2>
-      <p class="text-lg md:text-xl text-textmuted mb-8 max-w-lg">
-        Arbius is a decentralized network for machine learning and a token with a fixed total supply like Bitcoin. New coins are generated with GPU power by participating in the network. There is no central authority to create new coins.
-      </p>
-      <div class="flex gap-4">
-        <a href="{% url 'playground' %}" class="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-8 py-3 rounded-full shadow hover:scale-105 transition flex items-center gap-2 text-lg">
-          Try now <i class="fas fa-arrow-right"></i>
-        </a>
-        <a href="#" class="border border-textmuted text-white font-semibold px-8 py-3 rounded-full hover:bg-cardbg transition flex items-center gap-2 text-lg">
-          Read Whitepaper
-        </a>
-      </div>
-    </div>
-    <!-- Right: Card -->
-    <div class="flex-1 flex items-center justify-center">
-      <div class="bg-[#181f3a]/80 rounded-2xl shadow-xl flex flex-col items-center justify-center px-12 py-16 min-w-[340px] min-h-[220px] border border-[#232b45]">
-        <div class="bg-gradient-to-r from-primary to-secondary rounded-full p-4 mb-4">
-          <i class="fas fa-brain text-white text-5xl"></i>
-        </div>
-        <h3 class="text-2xl font-bold text-white mb-1">Decentralized AI</h3>
-        <p class="text-textmuted text-base">Powered by Proof-of-Useful-Work</p>
-      </div>
-    </div>
+<!-- Centered Button Section with Animated Questions -->
+<section class="w-full min-h-[calc(100vh-5rem)] flex items-center justify-center bg-gradient-to-b from-[#181f3a] to-[#10172a] relative overflow-hidden">
+  <div id="questions-bg" class="absolute inset-0 pointer-events-none z-0"></div>
+  <div class="relative z-10 text-center">
+    <a href="{% url 'playground' %}" class="inline-block border-2 border-white text-white font-semibold px-12 py-4 rounded-full hover:bg-white hover:text-darkbg transition-all duration-300 text-lg">
+      Try now
+    </a>
   </div>
 </section>
+{% endblock %}
 
-<!-- Multi-Model Economy Section -->
-<section class="w-full bg-[#10172a] py-20 px-4">
-  <div class="max-w-6xl mx-auto">
-    <h2 class="text-4xl md:text-5xl font-extrabold text-white text-center mb-2">Multi-Model Economy!</h2>
-    <h3 class="text-2xl text-textmuted text-center mb-12 font-medium">DeFi for AI</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-[#181f3a] rounded-2xl p-10 flex flex-col items-center shadow-xl border border-[#232b45]">
-        <i class="fas fa-network-wired text-primary text-4xl mb-4"></i>
-        <h4 class="text-xl font-bold text-white mb-2">Decentralized Network</h4>
-        <p class="text-textmuted text-center text-base">OSS models such as Llama 3, Deepseek R1 and others can now be part of a shared AI economy for all. Arbius handles accelerated compute matchmaking for each request.</p>
-      </div>
-      <div class="bg-[#181f3a] rounded-2xl p-10 flex flex-col items-center shadow-xl border border-[#232b45]">
-        <i class="fas fa-robot text-primary text-4xl mb-4"></i>
-        <h4 class="text-xl font-bold text-white mb-2">Generative AI</h4>
-        <p class="text-textmuted text-center text-base">Be part of the burgeoning AI economy! Users can now share in the value generated from AI, and model creators are now able to monetize their creations.</p>
-      </div>
-      <div class="bg-[#181f3a] rounded-2xl p-10 flex flex-col items-center shadow-xl border border-[#232b45]">
-        <i class="fas fa-store text-primary text-4xl mb-4"></i>
-        <h4 class="text-xl font-bold text-white mb-2">Marketplace</h4>
-        <p class="text-textmuted text-center text-base">Arbius has created a one of a kind ecosystem where agents for the first time can source their own compute. True autonomy starts here!</p>
-      </div>
-    </div>
-  </div>
-</section>
+{% block extra_js %}
+<script>
+const QUESTIONS = [
+  "Is monogamy natural?",
+  "Do aliens exist?",
+  "Is free will an illusion?",
+  "Can money buy happiness?",
+  "Is privacy dead?",
+  "Why do people cheat?",
+  "Is censorship ever justified?",
+  "Are some lies necessary?",
+  "Is AI dangerous?",
+  "Should voting be mandatory?",
+  "Is euthanasia ethical?",
+  "Can you love more than one person?",
+  "Is the death penalty justified?",
+  "Are humans inherently selfish?",
+  "Is religion necessary for morality?",
+  "Should drugs be legalized?",
+  "Is cloning humans ethical?",
+  "Is the world getting better or worse?",
+  "Are we living in a simulation?",
+  "Is it okay to break the law for a good reason?",
+  "Should parents be allowed to genetically modify their children?",
+  "Is social media destroying society?",
+  "Is it possible to truly forgive?",
+  "Are some cultures superior to others?",
+  "Is patriotism dangerous?",
+  "Should animals have the same rights as humans?",
+  "Is it ever okay to lie?",
+  "Is the customer always right?",
+  "Should we fear death?",
+  "Is war ever justified?",
+  "Is it possible to be truly unbiased?",
+  "Are men and women really that different?",
+  "Is it okay to keep secrets from loved ones?",
+  "Should everyone go to college?",
+  "Is it wrong to eat meat?",
+  "Is technology making us less human?",
+  "Is it possible to be truly selfless?",
+  "Should voting age be lowered?",
+  "Is it okay to use animals for scientific research?",
+  "Is beauty subjective or objective?",
+  "Should parents be friends with their children?",
+  "Is it okay to be rich in a poor world?",
+  "Is love just a chemical reaction?",
+  "Should we colonize other planets?",
+  "Is it okay to use AI for surveillance?",
+  "Is it possible to predict the future?",
+  "Should art be censored?",
+  "Is it okay to use performance-enhancing drugs?",
+  "Is it possible to be happy all the time?",
+  "Should we trust the media?",
+  "Is it okay to be selfish sometimes?",
+  "Is it possible to change your personality?",
+  "Should we fear artificial intelligence?",
+  "Is it okay to question authority?",
+  "Is it possible to live without regrets?",
+  "Should we forgive and forget?",
+  "Is it okay to be average?",
+  "Is it possible to be too honest?",
+  "Should we always follow our dreams?",
+  "Is it okay to give up?",
+  "Is it possible to love someone forever?",
+  "Should we always tell the truth?",
+  "Is it okay to be different?",
+  "Is it possible to be truly free?",
+  "Should we always help others?",
+  "Is it okay to be proud?",
+  "Is it possible to be too kind?",
+  "Should we always forgive?",
+  "Is it okay to be ambitious?",
+  "Is it possible to be too ambitious?",
+  "Should we always be optimistic?",
+  "Is it okay to be pessimistic?",
+  "Is it possible to be too optimistic?",
+  "Should we always be realistic?",
+  "Is it okay to be unrealistic?",
+  "Is it possible to be too realistic?",
+  "Should we always be logical?",
+  "Is it okay to be illogical?",
+  "Is it possible to be too logical?",
+  "Should we always be emotional?",
+  "Is it okay to be unemotional?",
+  "Is it possible to be too emotional?",
+  "Should we always be rational?",
+  "Is it okay to be irrational?",
+  "Is it possible to be too rational?",
+  "Should we always be creative?",
+  "Is it okay to be uncreative?",
+  "Is it possible to be too creative?",
+  "Should we always be original?",
+  "Is it okay to be unoriginal?",
+  "Is it possible to be too original?",
+  "Should we always be unique?",
+  "Is it okay to be ordinary?",
+  "Is it possible to be too unique?",
+  "Should we always be normal?",
+  "Is it okay to be abnormal?",
+  "Is it possible to be too normal?",
+  // ... (add more as needed)
+];
 
-<!-- Arbius Models Section -->
-<section class="w-full bg-[#10172a] py-20 px-4">
-  <div class="max-w-6xl mx-auto">
-    <h2 class="text-3xl md:text-4xl font-extrabold text-white text-center mb-2">Arbius Models</h2>
-    <p class="text-lg text-textmuted text-center mb-10">Explore the advanced AI models of Arbius, a decentralized machine learning network powered by AIUS and Proof-of-Useful-Work (PoUW).</p>
-    <div class="flex justify-between items-center mb-8">
-      <h4 class="text-xl font-bold text-white">Live Models</h4>
-      <a href="{% url 'playground' %}" class="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-6 py-2 rounded-full shadow hover:scale-105 transition flex items-center gap-2">
-        Visit Playground <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Qwen 32b -->
-      <div class="bg-[#181f3a] rounded-2xl p-8 flex flex-col gap-2 shadow-xl border border-[#232b45]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-lg font-bold text-white">Qwen 32b</span>
-          <span class="ml-2 px-2 py-1 rounded bg-green-600 text-xs text-white font-semibold">Live</span>
-        </div>
-        <div class="text-textmuted text-sm mb-1">Text Generation</div>
-        <div class="flex flex-col gap-1 text-textmuted text-xs">
-          <span>Emissions: 0%</span>
-          <span>Fees: 0.007 AIUS</span>
-        </div>
-      </div>
-      <!-- WAI SDXL -->
-      <div class="bg-[#181f3a] rounded-2xl p-8 flex flex-col gap-2 shadow-xl border border-[#232b45]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-lg font-bold text-white">WAI SDXL</span>
-          <span class="ml-2 px-2 py-1 rounded bg-green-600 text-xs text-white font-semibold">Live</span>
-        </div>
-        <div class="text-textmuted text-sm mb-1">NSFW Image Generation</div>
-        <div class="flex flex-col gap-1 text-textmuted text-xs">
-          <span>Emissions: 0%</span>
-          <span>Fees: 0.0035 AIUS</span>
-        </div>
-      </div>
-      <!-- M8B-Uncensored -->
-      <div class="bg-[#181f3a] rounded-2xl p-8 flex flex-col gap-2 shadow-xl border border-[#232b45]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-lg font-bold text-white">M8B-Uncensored</span>
-          <span class="ml-2 px-2 py-1 rounded bg-green-600 text-xs text-white font-semibold">Live</span>
-        </div>
-        <div class="text-textmuted text-sm mb-1">Uncensored Text Generation</div>
-        <div class="flex flex-col gap-1 text-textmuted text-xs">
-          <span>Emissions: 0%</span>
-          <span>Fees: 0.00003 AIUS</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+const TOTAL_QUESTIONS = 120; // Number of floating questions
+const questionsBg = document.getElementById('questions-bg');
+const vw = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const vh = () => Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
-<!-- veAIUS / Staking Section -->
-<section class="w-full bg-[#10172a] py-20 px-4">
-  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-    <div class="flex-1 flex flex-col items-start justify-center">
-      <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2">veAIUS</h2>
-      <h3 class="text-xl text-textmuted mb-4 font-medium">Shared Inference Fees</h3>
-      <p class="text-lg text-textmuted mb-6 max-w-lg">
-        veAIUS stakers share in fees from AI model inferences, providing a passive income stream as the network grows.
-      </p>
-      <div class="flex gap-4">
-        <button class="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-8 py-3 rounded-full shadow hover:scale-105 transition">Stake</button>
-        <button class="border border-textmuted text-white font-semibold px-8 py-3 rounded-full hover:bg-cardbg transition">View Gauges</button>
-      </div>
-    </div>
-    <div class="flex-1 flex items-center justify-center">
-      <div class="bg-[#181f3a] rounded-2xl shadow-xl flex flex-col items-center justify-center px-12 py-16 min-w-[340px] min-h-[220px] border border-[#232b45]">
-        <h4 class="text-xl font-bold text-white mb-3">Boosting AI Model Inference</h4>
-        <p class="text-textmuted text-base mb-4">veAIUS holders can direct higher rewards to specific AI models, making those models more attractive to run.</p>
-        <div class="w-full bg-[#232b45] rounded-full h-3 mb-3">
-          <div class="bg-gradient-to-r from-primary to-secondary h-3 rounded-full" style="width: 75%"></div>
-        </div>
-        <span class="text-textmuted text-xs">Current staking rewards: 75% of network fees</span>
-      </div>
-    </div>
-  </div>
-</section>
+function randomBetween(a, b) {
+  return a + Math.random() * (b - a);
+}
 
-<!-- Vision Section -->
-<section class="w-full bg-[#10172a] py-16 px-4">
-  <div class="max-w-4xl mx-auto text-center">
-    <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">We dream of open and accessible AI</h2>
-    <p class="text-textmuted text-base mb-10">Arbius is controlled by its users, not monopolized by large corporations and governments. The design of Arbius makes it difficult or impossible to censor usage, allowing for anyone in the world to interact with AI models permissionlessly.</p>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="flex flex-col items-center">
-        <i class="fas fa-server text-primary text-3xl mb-3"></i>
-        <h4 class="text-lg font-bold text-white mb-1">Decentralized AI Miners</h4>
-        <p class="text-textmuted text-sm">Miners are rewarded for Proof of Useful Work. Contestation ensures miner honesty, tasks are confirmed on a decentralized network.</p>
-      </div>
-      <div class="flex flex-col items-center">
-        <i class="fas fa-plug text-primary text-3xl mb-3"></i>
-        <h4 class="text-lg font-bold text-white mb-1">Direct Integration</h4>
-        <p class="text-textmuted text-sm">Generations done via Arbius's mining network directly outputs requests to downstream applications such as webapps, marketplaces, AI agents.</p>
-      </div>
-      <div class="flex flex-col items-center">
-        <i class="fas fa-chart-line text-primary text-3xl mb-3"></i>
-        <h4 class="text-lg font-bold text-white mb-1">DeFi AI</h4>
-        <p class="text-textmuted text-sm">Model creators are able to set a base fee for invocations, allowing them to monetize their creations. A portion of the revenue is distributed to Arbius DAO's treasury.</p>
-      </div>
-    </div>
-  </div>
-</section>
+function createQuestionEl(text) {
+  const el = document.createElement('span');
+  el.textContent = text;
+  el.className = 'absolute whitespace-nowrap text-xs md:text-base font-medium text-textmuted opacity-0 select-none pointer-events-none will-change-transform';
+  return el;
+}
+
+function animateQuestion(el) {
+  // 3D effect: start far, move to front
+  const angle = randomBetween(0, 2 * Math.PI);
+  const radius = randomBetween(vw() * 0.18, vw() * 0.45);
+  const centerX = vw() / 2;
+  const centerY = vh() / 2;
+  const startX = centerX + Math.cos(angle) * radius;
+  const startY = centerY + Math.sin(angle) * radius;
+
+  // Z-depth: start small, blurry, faint; end large, sharp, opaque
+  const startScale = 0.4;
+  const endScale = randomBetween(1.5, 2.2);
+  const startBlur = 6;
+  const endBlur = 0;
+  const startOpacity = 0.1;
+  const midOpacity = 0.85;
+  const endOpacity = 0;
+
+  // Animation duration
+  const totalDuration = randomBetween(4.5, 7.5); // seconds
+  const fadeInDuration = totalDuration * 0.5;
+  const fadeOutDuration = totalDuration * 0.2;
+
+  // Set initial position and style
+  el.style.left = `${startX}px`;
+  el.style.top = `${startY}px`;
+  el.style.opacity = startOpacity;
+  el.style.transform = `scale(${startScale})`;
+  el.style.filter = `blur(${startBlur}px)`;
+
+  // Animate in (fade in, grow, sharpen)
+  setTimeout(() => {
+    el.style.transition = `opacity ${fadeInDuration}s linear, transform ${totalDuration}s cubic-bezier(0.22,1,0.36,1), filter ${totalDuration}s linear`;
+    el.style.opacity = midOpacity;
+    el.style.transform = `scale(${endScale})`;
+    el.style.filter = `blur(${endBlur}px)`;
+  }, 10);
+
+  // Fade out fast at the end
+  setTimeout(() => {
+    el.style.transition = `opacity ${fadeOutDuration}s linear`;
+    el.style.opacity = endOpacity;
+  }, (totalDuration - fadeOutDuration) * 1000);
+
+  // Remove and recycle
+  setTimeout(() => {
+    el.remove();
+    spawnQuestion();
+  }, totalDuration * 1000);
+}
+
+function spawnQuestion() {
+  const text = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+  const el = createQuestionEl(text);
+  questionsBg.appendChild(el);
+  animateQuestion(el);
+}
+
+// Initial spawn
+for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+  setTimeout(spawnQuestion, Math.random() * 4000);
+}
+
+// Responsive: reflow on resize
+window.addEventListener('resize', () => {
+  questionsBg.innerHTML = '';
+  for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+    setTimeout(spawnQuestion, Math.random() * 4000);
+  }
+});
+</script>
 {% endblock %} 
