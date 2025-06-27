@@ -5,7 +5,7 @@
 {% block content %}
 <!-- Centered Button Section with Animated Questions -->
 <section class="w-full min-h-[calc(100vh-5rem)] flex items-center justify-center bg-gradient-to-b from-[#181f3a] to-[#10172a] relative overflow-hidden">
-  <div id="questions-bg" class="absolute inset-0 pointer-events-none z-0"></div>
+  <div id="questions-bg" class="absolute inset-0 pointer-events-none z-30"></div>
   <div class="relative z-10 text-center">
     <a href="{% url 'playground' %}" class="inline-block border-2 border-white text-white font-semibold px-12 py-4 rounded-full hover:bg-white hover:text-darkbg transition-all duration-300 text-lg">
       Try now
@@ -117,7 +117,7 @@ const QUESTIONS = [
   // ... (add more as needed)
 ];
 
-const TOTAL_QUESTIONS = 120; // Number of floating questions
+const TOTAL_QUESTIONS = 60; // Number of floating questions (reduced from 120)
 const questionsBg = document.getElementById('questions-bg');
 const vw = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 const vh = () => Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
@@ -134,13 +134,18 @@ function createQuestionEl(text) {
 }
 
 function animateQuestion(el) {
-  // 3D effect: start far, move to front
-  const angle = randomBetween(0, 2 * Math.PI);
-  const radius = randomBetween(vw() * 0.18, vw() * 0.45);
+  // Truly random positioning across the entire screen, but avoid center area
   const centerX = vw() / 2;
   const centerY = vh() / 2;
-  const startX = centerX + Math.cos(angle) * radius;
-  const startY = centerY + Math.sin(angle) * radius;
+  const clearRadius = 200; // Clear area around the button
+  
+  let startX, startY;
+  do {
+    startX = randomBetween(0, vw());
+    startY = randomBetween(0, vh());
+  } while (
+    Math.sqrt((startX - centerX) ** 2 + (startY - centerY) ** 2) < clearRadius
+  );
 
   // Z-depth: start small, blurry, faint; end large, sharp, opaque
   const startScale = 0.4;
@@ -151,8 +156,8 @@ function animateQuestion(el) {
   const midOpacity = 0.85;
   const endOpacity = 0;
 
-  // Animation duration
-  const totalDuration = randomBetween(4.5, 7.5); // seconds
+  // Animation duration - slower
+  const totalDuration = randomBetween(8, 12); // seconds (increased from 4.5-7.5)
   const fadeInDuration = totalDuration * 0.5;
   const fadeOutDuration = totalDuration * 0.2;
 
