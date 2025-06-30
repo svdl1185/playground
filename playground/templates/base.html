@@ -28,27 +28,80 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     {% block extra_css %}{% endblock %}
+    <style>
+      .nav-glass {
+        background: rgba(15,23,42,0.7);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 2px 24px 0 rgba(16,23,42,0.10);
+      }
+      .nav-link {
+        @apply text-textmuted hover:text-white transition px-3 py-2 rounded-lg font-medium;
+      }
+      .nav-link-active {
+        @apply text-white bg-primary/20;
+      }
+      .nav-wallet-btn {
+        @apply bg-primary text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-secondary transition flex items-center gap-2;
+      }
+      .nav-wallet-address {
+        @apply bg-[#232b45] text-textmuted px-4 py-2 rounded-lg text-xs font-mono;
+      }
+      .nav-mobile-menu {
+        background: rgba(15,23,42,0.98);
+        backdrop-filter: blur(24px);
+      }
+    </style>
 </head>
 <body class="bg-darkbg text-textlight font-sans min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="w-full bg-[rgba(15,23,42,0.8)] backdrop-blur-md fixed top-0 z-20 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-            <div class="flex items-center gap-2">
-                <a href="{% url 'home' %}" class="flex items-center gap-2 font-bold text-xl text-white">
-                    <i class="fas fa-brain text-primary"></i>
-                    Arbius
-                </a>
-                <div class="hidden md:flex gap-6 ml-8">
-                    <a href="{% url 'playground' %}" class="text-textmuted hover:text-white transition">Playground</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <button class="bg-[#232b45] text-white px-4 py-2 rounded-lg flex items-center gap-2 border border-[#232b45] hover:bg-[#181f3a] transition">
-                    <i class="fas fa-wallet"></i> Wallet <span class="ml-1 text-xs text-red-400">&#9888;</span>
-                </button>
-                <span class="bg-[#232b45] text-textmuted px-4 py-2 rounded-lg text-xs font-mono">@0x0F15...0FFB</span>
-            </div>
+    <nav class="nav-glass w-full fixed top-0 z-30 transition-all duration-300">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 relative">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <a href="{% url 'home' %}" class="flex items-center gap-2 font-bold text-2xl text-white">
+            <span class="inline-block w-7 h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
+              <i class="fas fa-brain text-white text-lg"></i>
+            </span>
+            Arbius
+          </a>
         </div>
+        <!-- Wallet/Actions -->
+        <div class="flex items-center gap-3">
+          {% if user.is_authenticated and user.wallet_address %}
+            <span class="nav-wallet-address">{{ user.wallet_address|truncatechars:14 }}</span>
+          {% else %}
+            <button class="nav-wallet-btn">
+              <i class="fas fa-wallet"></i> Connect Wallet
+            </button>
+          {% endif %}
+          <!-- Hamburger for mobile -->
+          <button id="nav-mobile-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#232b45] transition">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Mobile Menu -->
+      <div id="nav-mobile-menu" class="nav-mobile-menu fixed top-16 left-0 w-full py-6 px-6 flex flex-col gap-4 md:hidden hidden z-40">
+        <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-link-active{% endif %}">Home</a>
+        <a href="{% url 'playground' %}" class="nav-link {% if request.resolver_match.url_name == 'playground' %}nav-link-active{% endif %}">Playground</a>
+        {% if user.is_authenticated and user.wallet_address %}
+          <span class="nav-wallet-address">{{ user.wallet_address|truncatechars:14 }}</span>
+        {% else %}
+          <button class="nav-wallet-btn w-full justify-center">
+            <i class="fas fa-wallet"></i> Connect Wallet
+          </button>
+        {% endif %}
+      </div>
+      <script>
+        const navToggle = document.getElementById('nav-mobile-toggle');
+        const navMenu = document.getElementById('nav-mobile-menu');
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('hidden');
+        });
+        window.addEventListener('resize', () => {
+          if(window.innerWidth >= 768) navMenu.classList.add('hidden');
+        });
+      </script>
     </nav>
     <main class="flex-1 w-full pt-20">
         {% block content %}{% endblock %}
