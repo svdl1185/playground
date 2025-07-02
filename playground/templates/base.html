@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,13 +68,14 @@
         </div>
         <!-- Wallet/Actions -->
         <div class="flex items-center gap-3">
-          {% if user.is_authenticated and user.wallet_address %}
-            <span class="nav-wallet-address">{{ user.wallet_address|truncatechars:14 }}</span>
-          {% else %}
-            <button class="nav-wallet-btn">
-              <i class="fas fa-wallet"></i> Connect Wallet
-            </button>
-          {% endif %}
+          <span id="wallet-address" class="nav-wallet-address" style="display: none;"></span>
+          <span id="aius-balance" class="nav-wallet-address ml-2" style="display: none;"></span>
+          <button id="disconnect-wallet-btn" class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow hover:bg-red-700 transition" style="display: none;">
+            <i class="fas fa-sign-out-alt"></i> Disconnect
+          </button>
+          <button id="connect-wallet-btn" class="nav-wallet-btn">
+            <i class="fas fa-wallet"></i> Connect Wallet
+          </button>
           <!-- Hamburger for mobile -->
           <button id="nav-mobile-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#232b45] transition">
             <i class="fas fa-bars text-xl"></i>
@@ -84,13 +86,14 @@
       <div id="nav-mobile-menu" class="nav-mobile-menu fixed top-16 left-0 w-full py-6 px-6 flex flex-col gap-4 md:hidden hidden z-40">
         <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-link-active{% endif %}">Home</a>
         <a href="{% url 'playground' %}" class="nav-link {% if request.resolver_match.url_name == 'playground' %}nav-link-active{% endif %}">Playground</a>
-        {% if user.is_authenticated and user.wallet_address %}
-          <span class="nav-wallet-address">{{ user.wallet_address|truncatechars:14 }}</span>
-        {% else %}
-          <button class="nav-wallet-btn w-full justify-center">
-            <i class="fas fa-wallet"></i> Connect Wallet
-          </button>
-        {% endif %}
+        <span id="wallet-address-mobile" class="nav-wallet-address w-full justify-center" style="display: none;"></span>
+        <span id="aius-balance-mobile" class="nav-wallet-address w-full justify-center ml-2" style="display: none;"></span>
+        <button id="disconnect-wallet-btn-mobile" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-red-700 transition w-full justify-center" style="display: none;">
+          <i class="fas fa-sign-out-alt"></i> Disconnect Wallet
+        </button>
+        <button id="connect-wallet-btn-mobile" class="nav-wallet-btn w-full justify-center">
+          <i class="fas fa-wallet"></i> Connect Wallet
+        </button>
       </div>
       <script>
         const navToggle = document.getElementById('nav-mobile-toggle');
@@ -135,5 +138,7 @@
         <div class="text-center text-textmuted mt-8 text-sm">&copy; 2025 Arbius. All rights reserved.</div>
     </footer>
     {% block extra_js %}{% endblock %}
+    <!-- MetaMask Integration -->
+    <script src="{% static 'js/metamask.js' %}"></script>
 </body>
 </html> 

@@ -1,0 +1,488 @@
+class MetaMaskManager {
+    constructor() {
+        this.isConnected = false;
+        this.account = null;
+        this.arbitrumChainId = '0xa4b1'; // Arbitrum One
+        this.arbitrumTestnetChainId = '0x66eed'; // Arbitrum Sepolia
+        this.aiusContractAddress = '0x4a24B101728e07A52053c13FB4dB2BcF490CAbc3';
+        this.ethersLoaded = false;
+        this.init();
+    }
+
+    async init() {
+        if (typeof window.ethereum !== 'undefined') {
+            this.setupEventListeners();
+            await this.checkBackendAuthStatus(); // Only trust backend
+        } else {
+            this.showMetaMaskNotInstalled();
+        }
+    }
+
+    setupEventListeners() {
+        // Listen for account changes
+        window.ethereum.on('accountsChanged', (accounts) => {
+            if (accounts.length === 0) {
+                this.disconnect();
+            } else {
+                this.account = accounts[0];
+                this.updateUI();
+                this.storeConnectionState();
+            }
+        });
+
+        // Listen for chain changes
+        window.ethereum.on('chainChanged', (chainId) => {
+            this.checkAndSwitchNetwork();
+        });
+    }
+
+    async checkConnection() {
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            if (accounts.length > 0) {
+                this.account = accounts[0];
+                this.isConnected = true;
+                await this.checkAndSwitchNetwork();
+            } else {
+                this.isConnected = false;
+                this.account = null;
+            }
+        } catch (error) {
+            this.isConnected = false;
+            this.account = null;
+        }
+    }
+
+    checkStoredConnection() {
+        // No longer used: always trust backend
+    }
+
+    async checkBackendAuthStatus() {
+        try {
+            const response = await fetch('/api/check-auth-status/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.authenticated && data.address) {
+                    this.account = data.address;
+                    this.isConnected = true;
+                } else {
+                    this.isConnected = false;
+                    this.account = null;
+                }
+            } else {
+                this.isConnected = false;
+                this.account = null;
+            }
+        } catch (error) {
+            this.isConnected = false;
+            this.account = null;
+        }
+        this.updateUI();
+        this.storeConnectionState();
+    }
+
+    storeConnectionState() {
+        const state = {
+            isConnected: this.isConnected,
+            account: this.account,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('metamask_connection', JSON.stringify(state));
+    }
+
+    clearStoredConnectionState() {
+        localStorage.removeItem('metamask_connection');
+    }
+
+    async connect() {
+        try {
+            const accounts = await window.ethereum.request({ 
+                method: 'eth_requestAccounts' 
+            });
+            this.account = accounts[0];
+            this.isConnected = true;
+            await this.switchToArbitrum();
+            await this.requestSignature();
+            // After signature, always check backend for true state
+            await this.checkBackendAuthStatus();
+        } catch (error) {
+            this.isConnected = false;
+            this.account = null;
+            this.updateUI();
+            this.storeConnectionState();
+            this.showError('Failed to connect wallet. Please try again.');
+        }
+    }
+
+    async switchToArbitrum() {
+        try {
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            
+            if (chainId !== this.arbitrumChainId && chainId !== this.arbitrumTestnetChainId) {
+                await this.addArbitrumNetwork();
+                await this.switchNetwork(this.arbitrumChainId);
+            }
+        } catch (error) {
+            console.error('Error switching network:', error);
+            this.showError('Failed to switch to Arbitrum network.');
+        }
+    }
+
+    async addArbitrumNetwork() {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                    chainId: this.arbitrumChainId,
+                    chainName: 'Arbitrum One',
+                    nativeCurrency: {
+                        name: 'Ether',
+                        symbol: 'ETH',
+                        decimals: 18
+                    },
+                    rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                    blockExplorerUrls: ['https://arbiscan.io/']
+                }]
+            });
+        } catch (error) {
+            console.error('Error adding Arbitrum network:', error);
+        }
+    }
+
+    async switchNetwork(chainId) {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: chainId }]
+            });
+        } catch (error) {
+            console.error('Error switching network:', error);
+        }
+    }
+
+    async requestSignature() {
+        try {
+            const message = `Welcome to Arbius Playground!\n\nPlease sign this message to connect your wallet.\n\nTimestamp: ${new Date().toISOString()}`;
+            const signature = await window.ethereum.request({
+                method: 'personal_sign',
+                params: [message, this.account]
+            });
+            await this.verifySignature(message, signature);
+        } catch (error) {
+            this.isConnected = false;
+            this.account = null;
+            this.updateUI();
+            this.storeConnectionState();
+            this.showError('Signature request was rejected.');
+        }
+    }
+
+    async verifySignature(message, signature) {
+        try {
+            const response = await fetch('/api/verify-signature/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    address: this.account,
+                    message: message,
+                    signature: signature
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    this.showSuccess('Wallet connected successfully!');
+                } else {
+                    this.isConnected = false;
+                    this.account = null;
+                    this.updateUI();
+                    this.storeConnectionState();
+                    this.showError(data.error || 'Signature verification failed.');
+                }
+            } else {
+                this.isConnected = false;
+                this.account = null;
+                this.updateUI();
+                this.storeConnectionState();
+                this.showError('Failed to verify signature.');
+            }
+        } catch (error) {
+            this.isConnected = false;
+            this.account = null;
+            this.updateUI();
+            this.storeConnectionState();
+            this.showError('Failed to verify signature.');
+        }
+    }
+
+    async disconnect() {
+        try {
+            // Call backend logout endpoint
+            const response = await fetch('/api/logout-wallet/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                }
+            });
+
+            if (response.ok) {
+                this.showSuccess('Wallet disconnected successfully!');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+
+        this.isConnected = false;
+        this.account = null;
+        this.updateUI();
+        this.clearStoredConnectionState();
+    }
+
+    async loadEthers() {
+        if (window.ethers) {
+            this.ethersLoaded = true;
+            return;
+        }
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
+            script.onload = () => {
+                this.ethersLoaded = true;
+                resolve();
+            };
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    async fetchAIUSBalance() {
+        await this.loadEthers();
+        if (!window.ethers || !this.account) return null;
+        const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+        const erc20Abi = [
+            'function balanceOf(address owner) view returns (uint256)',
+            'function decimals() view returns (uint8)'
+        ];
+        const contract = new window.ethers.Contract(this.aiusContractAddress, erc20Abi, provider);
+        try {
+            const [balance, decimals] = await Promise.all([
+                contract.balanceOf(this.account),
+                contract.decimals()
+            ]);
+            return (Number(balance) / Math.pow(10, decimals)).toFixed(4);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async updateBalanceUI() {
+        const aiusBalanceSpan = document.getElementById('aius-balance');
+        const aiusBalanceMobile = document.getElementById('aius-balance-mobile');
+        if (this.isConnected && this.account) {
+            const balance = await this.fetchAIUSBalance();
+            if (balance !== null) {
+                if (aiusBalanceSpan) {
+                    aiusBalanceSpan.textContent = `${balance} AIUS`;
+                    aiusBalanceSpan.style.display = 'inline-block';
+                }
+                if (aiusBalanceMobile) {
+                    aiusBalanceMobile.textContent = `${balance} AIUS`;
+                    aiusBalanceMobile.style.display = 'block';
+                }
+            } else {
+                if (aiusBalanceSpan) aiusBalanceSpan.style.display = 'none';
+                if (aiusBalanceMobile) aiusBalanceMobile.style.display = 'none';
+            }
+        } else {
+            if (aiusBalanceSpan) aiusBalanceSpan.style.display = 'none';
+            if (aiusBalanceMobile) aiusBalanceMobile.style.display = 'none';
+        }
+    }
+
+    async updateUI() {
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const connectBtnMobile = document.getElementById('connect-wallet-btn-mobile');
+        const disconnectBtn = document.getElementById('disconnect-wallet-btn');
+        const disconnectBtnMobile = document.getElementById('disconnect-wallet-btn-mobile');
+        const walletAddress = document.getElementById('wallet-address');
+        const walletAddressMobile = document.getElementById('wallet-address-mobile');
+        
+        if (this.isConnected && this.account) {
+            if (connectBtn) {
+                connectBtn.style.display = 'none';
+            }
+            if (connectBtnMobile) {
+                connectBtnMobile.style.display = 'none';
+            }
+            if (disconnectBtn) {
+                disconnectBtn.style.display = 'inline-flex';
+            }
+            if (disconnectBtnMobile) {
+                disconnectBtnMobile.style.display = 'block';
+            }
+            if (walletAddress) {
+                walletAddress.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
+                walletAddress.style.display = 'inline-block';
+            }
+            if (walletAddressMobile) {
+                walletAddressMobile.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
+                walletAddressMobile.style.display = 'block';
+            }
+            this.updateBalanceUI();
+        } else {
+            if (connectBtn) {
+                connectBtn.style.display = 'inline-flex';
+            }
+            if (connectBtnMobile) {
+                connectBtnMobile.style.display = 'block';
+            }
+            if (disconnectBtn) {
+                disconnectBtn.style.display = 'none';
+            }
+            if (disconnectBtnMobile) {
+                disconnectBtnMobile.style.display = 'none';
+            }
+            if (walletAddress) {
+                walletAddress.style.display = 'none';
+            }
+            if (walletAddressMobile) {
+                walletAddressMobile.style.display = 'none';
+            }
+            this.updateBalanceUI();
+        }
+    }
+
+    showMetaMaskNotInstalled() {
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const connectBtnMobile = document.getElementById('connect-wallet-btn-mobile');
+        
+        if (connectBtn) {
+            connectBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Install MetaMask';
+            connectBtn.onclick = () => {
+                window.open('https://metamask.io/download/', '_blank');
+            };
+        }
+        
+        if (connectBtnMobile) {
+            connectBtnMobile.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Install MetaMask';
+            connectBtnMobile.onclick = () => {
+                window.open('https://metamask.io/download/', '_blank');
+            };
+        }
+    }
+
+    showError(message) {
+        // Create a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-24 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 5000);
+    }
+
+    showSuccess(message) {
+        // Create a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-24 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 5000);
+    }
+
+    getCSRFToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+}
+
+// Initialize MetaMask manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.metaMaskManager = new MetaMaskManager();
+    
+    // Add click handlers to connect buttons
+    const connectBtn = document.getElementById('connect-wallet-btn');
+    const connectBtnMobile = document.getElementById('connect-wallet-btn-mobile');
+    
+    if (connectBtn) {
+        connectBtn.addEventListener('click', () => {
+            window.metaMaskManager.connect();
+        });
+    }
+    
+    if (connectBtnMobile) {
+        connectBtnMobile.addEventListener('click', () => {
+            window.metaMaskManager.connect();
+        });
+    }
+
+    // Add click handlers to disconnect buttons
+    const disconnectBtn = document.getElementById('disconnect-wallet-btn');
+    const disconnectBtnMobile = document.getElementById('disconnect-wallet-btn-mobile');
+    
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', () => {
+            window.metaMaskManager.disconnect();
+        });
+    }
+    
+    if (disconnectBtnMobile) {
+        disconnectBtnMobile.addEventListener('click', () => {
+            window.metaMaskManager.disconnect();
+        });
+    }
+}); 
