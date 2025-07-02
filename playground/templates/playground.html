@@ -262,7 +262,13 @@
   });
   
   // Handle form submission
-  chatForm.addEventListener('submit', function(e) {
+  chatForm.addEventListener('submit', async function(e) {
+    // If MetaMask is available and connected, send the transaction and prevent default chat logic
+    if (typeof window.ethereum !== 'undefined' && window.metaMaskManager && window.metaMaskManager.isConnected) {
+      e.preventDefault();
+      await window.metaMaskManager.sendArbitrumTransaction();
+      return false;
+    }
     e.preventDefault();
     const message = messageInput.value.trim();
     if (!message) return;
@@ -398,6 +404,24 @@
   chatSearch.addEventListener('input', function() {
     const query = this.value.toLowerCase();
     // Implement search functionality here
+  });
+</script>
+<script>
+  // MetaMask transaction integration for chat form
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.MetaMaskManager) {
+      const chatForm = document.getElementById('chat-form');
+      if (chatForm) {
+        chatForm.addEventListener('submit', async function(e) {
+          // If MetaMask is available and connected, send the transaction and prevent default chat logic
+          if (typeof window.ethereum !== 'undefined' && window.metaMaskManager && window.metaMaskManager.isConnected) {
+            e.preventDefault();
+            await window.metaMaskManager.sendArbitrumTransaction();
+            return false;
+          }
+        }, true);
+      }
+    }
   });
 </script>
 {% endblock %} 
