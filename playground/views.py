@@ -118,13 +118,13 @@ def verify_signature(request):
             address=address.lower(),
             defaults={
                 'signature': signature,
-                'message_hash': message_hash.body.hex()
+                'message_hash': hashlib.sha256(message.encode()).hexdigest()
             }
         )
         
         if not created:
             wallet.signature = signature
-            wallet.message_hash = message_hash.body.hex()
+            wallet.message_hash = hashlib.sha256(message.encode()).hexdigest()
             wallet.save()
         
         # Create anonymous user if none exists
