@@ -102,6 +102,9 @@ class MetaMaskManager {
 
     async connect() {
         try {
+            // Show loading state
+            this.setConnectButtonLoading(true);
+            
             const accounts = await window.ethereum.request({ 
                 method: 'eth_requestAccounts' 
             });
@@ -117,6 +120,38 @@ class MetaMaskManager {
             this.updateUI();
             this.storeConnectionState();
             this.showError('Failed to connect wallet. Please try again.');
+        } finally {
+            // Reset loading state
+            this.setConnectButtonLoading(false);
+        }
+    }
+
+    setConnectButtonLoading(loading) {
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const connectBtnMobile = document.getElementById('connect-wallet-btn-mobile');
+        
+        if (loading) {
+            if (connectBtn) {
+                connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                connectBtn.disabled = true;
+                connectBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+            if (connectBtnMobile) {
+                connectBtnMobile.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                connectBtnMobile.disabled = true;
+                connectBtnMobile.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+        } else {
+            if (connectBtn) {
+                connectBtn.innerHTML = '<i class="fas fa-wallet"></i> Connect Wallet';
+                connectBtn.disabled = false;
+                connectBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            if (connectBtnMobile) {
+                connectBtnMobile.innerHTML = '<i class="fas fa-wallet"></i> Connect';
+                connectBtnMobile.disabled = false;
+                connectBtnMobile.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
         }
     }
 
@@ -316,48 +351,62 @@ class MetaMaskManager {
         const disconnectBtnMobile = document.getElementById('disconnect-wallet-btn-mobile');
         const walletAddress = document.getElementById('wallet-address');
         const walletAddressMobile = document.getElementById('wallet-address-mobile');
+        const walletConnectedContainer = document.getElementById('wallet-connected-container');
+        const walletConnectedMobile = document.getElementById('wallet-connected-mobile');
+        const aiusBalance = document.getElementById('aius-balance');
+        const aiusBalanceMobile = document.getElementById('aius-balance-mobile');
         
         if (this.isConnected && this.account) {
-            if (connectBtn) {
-                connectBtn.style.display = 'none';
+            // Get current network
+            let networkName = 'Unknown';
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId === this.arbitrumChainId) {
+                    networkName = 'Arbitrum One';
+                } else if (chainId === this.arbitrumTestnetChainId) {
+                    networkName = 'Arbitrum Sepolia';
+                } else {
+                    networkName = 'Other Network';
+                }
+            } catch (error) {
+                console.error('Error getting chain ID:', error);
             }
-            if (connectBtnMobile) {
-                connectBtnMobile.style.display = 'none';
-            }
-            if (disconnectBtn) {
-                disconnectBtn.style.display = 'inline-flex';
-            }
-            if (disconnectBtnMobile) {
-                disconnectBtnMobile.style.display = 'block';
-            }
+            // Desktop UI
+            if (connectBtn) connectBtn.style.display = 'none';
+            if (walletConnectedContainer) walletConnectedContainer.style.display = 'flex';
             if (walletAddress) {
-                walletAddress.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
-                walletAddress.style.display = 'inline-block';
+                walletAddress.innerHTML = `
+                    <div class="flex flex-col cursor-pointer hover:bg-[#334155] transition-colors duration-200 rounded px-2 py-1" onclick="navigator.clipboard.writeText('${this.account}').then(() => window.metaMaskManager.showSuccess('Address copied to clipboard!'))">
+                        <span class="text-textmuted text-sm font-mono">${this.account.slice(0, 6)}...${this.account.slice(-4)}</span>
+                        <span class="text-xs text-textmuted">${networkName}</span>
+                    </div>
+                `;
+                walletAddress.style.display = '';
             }
+            if (aiusBalance) aiusBalance.style.display = '';
+            if (disconnectBtn) disconnectBtn.style.display = 'inline-flex';
+            // Mobile UI
+            if (connectBtnMobile) connectBtnMobile.style.display = 'none';
+            if (walletConnectedMobile) walletConnectedMobile.style.display = 'flex';
             if (walletAddressMobile) {
-                walletAddressMobile.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
-                walletAddressMobile.style.display = 'block';
+                walletAddressMobile.innerHTML = `
+                    <div class="flex flex-col cursor-pointer hover:bg-[#334155] transition-colors duration-200 rounded px-2 py-1" onclick="navigator.clipboard.writeText('${this.account}').then(() => window.metaMaskManager.showSuccess('Address copied to clipboard!'))">
+                        <span class="text-textmuted text-sm font-mono">${this.account.slice(0, 6)}...${this.account.slice(-4)}</span>
+                        <span class="text-xs text-textmuted">${networkName}</span>
+                    </div>
+                `;
+                walletAddressMobile.style.display = '';
             }
+            if (aiusBalanceMobile) aiusBalanceMobile.style.display = '';
+            if (disconnectBtnMobile) disconnectBtnMobile.style.display = 'block';
             this.updateBalanceUI();
         } else {
-            if (connectBtn) {
-                connectBtn.style.display = 'inline-flex';
-            }
-            if (connectBtnMobile) {
-                connectBtnMobile.style.display = 'block';
-            }
-            if (disconnectBtn) {
-                disconnectBtn.style.display = 'none';
-            }
-            if (disconnectBtnMobile) {
-                disconnectBtnMobile.style.display = 'none';
-            }
-            if (walletAddress) {
-                walletAddress.style.display = 'none';
-            }
-            if (walletAddressMobile) {
-                walletAddressMobile.style.display = 'none';
-            }
+            // Desktop UI
+            if (connectBtn) connectBtn.style.display = 'inline-flex';
+            if (walletConnectedContainer) walletConnectedContainer.style.display = 'none';
+            // Mobile UI
+            if (connectBtnMobile) connectBtnMobile.style.display = 'inline-flex';
+            if (walletConnectedMobile) walletConnectedMobile.style.display = 'none';
             this.updateBalanceUI();
         }
     }
@@ -384,11 +433,13 @@ class MetaMaskManager {
     showError(message) {
         // Create a toast notification
         const toast = document.createElement('div');
-        toast.className = 'fixed top-24 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        toast.className = 'fixed top-24 right-4 bg-red-600/90 backdrop-blur-lg text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform transition-all duration-300 translate-x-full border border-red-500/30';
         toast.innerHTML = `
-            <div class="flex items-center gap-2">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>${message}</span>
+            <div class="flex items-center gap-3">
+                <div class="w-5 h-5 rounded-full bg-red-400 flex items-center justify-center">
+                    <i class="fas fa-exclamation text-red-900 text-xs"></i>
+                </div>
+                <span class="font-medium">${message}</span>
             </div>
         `;
         document.body.appendChild(toast);
@@ -410,11 +461,13 @@ class MetaMaskManager {
     showSuccess(message) {
         // Create a toast notification
         const toast = document.createElement('div');
-        toast.className = 'fixed top-24 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        toast.className = 'fixed top-24 right-4 bg-green-600/90 backdrop-blur-lg text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform transition-all duration-300 translate-x-full border border-green-500/30';
         toast.innerHTML = `
-            <div class="flex items-center gap-2">
-                <i class="fas fa-check-circle"></i>
-                <span>${message}</span>
+            <div class="flex items-center gap-3">
+                <div class="w-5 h-5 rounded-full bg-green-400 flex items-center justify-center">
+                    <i class="fas fa-check text-green-900 text-xs"></i>
+                </div>
+                <span class="font-medium">${message}</span>
             </div>
         `;
         document.body.appendChild(toast);
