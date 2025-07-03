@@ -6,9 +6,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 import json
 import hashlib
+import logging
 from eth_account.messages import encode_defunct
 from web3 import Web3
 from .models import Wallet
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -48,6 +52,7 @@ def check_auth_status(request):
                 'username': None
             })
     except Exception as e:
+        logger.error(f"Error in check_auth_status: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -64,6 +69,7 @@ def logout_wallet(request):
             'message': 'Logged out successfully'
         })
     except Exception as e:
+        logger.error(f"Error in logout_wallet: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -74,29 +80,40 @@ def logout_wallet(request):
 def verify_signature(request):
     """Verify Ethereum signature and connect wallet"""
     try:
+        logger.info("Starting signature verification")
         data = json.loads(request.body)
         address = data.get('address')
         message = data.get('message')
         signature = data.get('signature')
         
+        logger.info(f"Received data - address: {address}, message length: {len(message) if message else 0}, signature length: {len(signature) if signature else 0}")
+        
         if not all([address, message, signature]):
+            logger.error("Missing required parameters")
             return JsonResponse({
                 'success': False,
                 'error': 'Missing required parameters'
             }, status=400)
         
         # Verify the signature
+        logger.info("Creating Web3 instance")
         w3 = Web3()
+        logger.info("Encoding message")
         message_hash = encode_defunct(text=message)
+        logger.info("Recovering address from signature")
         recovered_address = w3.eth.account.recover_message(message_hash, signature=signature)
         
+        logger.info(f"Recovered address: {recovered_address}, Original address: {address}")
+        
         if recovered_address.lower() != address.lower():
+            logger.error(f"Invalid signature - recovered: {recovered_address}, expected: {address}")
             return JsonResponse({
                 'success': False,
                 'error': 'Invalid signature'
             }, status=400)
         
         # Create or update wallet record
+        logger.info("Creating/updating wallet record")
         wallet, created = Wallet.objects.get_or_create(  # type: ignore[attr-defined]
             address=address.lower(),
             defaults={
@@ -112,6 +129,7 @@ def verify_signature(request):
         
         # Create anonymous user if none exists
         if not wallet.user:
+            logger.info("Creating new user for wallet")
             username = f"user_{address[:8]}"
             user = User.objects.create_user(
                 username=username,
@@ -122,10 +140,12 @@ def verify_signature(request):
             wallet.save()
         
         # Log in the user
+        logger.info("Logging in user")
         login(request, wallet.user)
         
         request.session['wallet_address'] = wallet.address
         
+        logger.info("Signature verification successful")
         return JsonResponse({
             'success': True,
             'message': 'Wallet connected successfully',
@@ -133,12 +153,14 @@ def verify_signature(request):
             'username': wallet.user.username
         })
         
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': 'Invalid JSON'
         }, status=400)
     except Exception as e:
+        logger.error(f"Error in verify_signature: {str(e)}", exc_info=True)
         return JsonResponse({
             'success': False,
             'error': str(e)
