@@ -350,6 +350,7 @@ class MetaMaskManager {
         const disconnectBtn = document.getElementById('disconnect-wallet-btn');
         const disconnectBtnMobile = document.getElementById('disconnect-wallet-btn-mobile');
         const walletAddress = document.getElementById('wallet-address');
+        const walletNetwork = document.getElementById('wallet-network');
         const walletAddressMobile = document.getElementById('wallet-address-mobile');
         const walletConnectedContainer = document.getElementById('wallet-connected-container');
         const walletConnectedMobile = document.getElementById('wallet-connected-mobile');
@@ -375,26 +376,28 @@ class MetaMaskManager {
             if (connectBtn) connectBtn.style.display = 'none';
             if (walletConnectedContainer) walletConnectedContainer.style.display = 'flex';
             if (walletAddress) {
-                walletAddress.innerHTML = `
-                    <div class="flex flex-col cursor-pointer hover:bg-[#334155] transition-colors duration-200 rounded px-2 py-1" onclick="navigator.clipboard.writeText('${this.account}').then(() => window.metaMaskManager.showSuccess('Address copied to clipboard!'))">
-                        <span class="text-textmuted text-sm font-mono">${this.account.slice(0, 6)}...${this.account.slice(-4)}</span>
-                        <span class="text-xs text-textmuted">${networkName}</span>
-                    </div>
-                `;
+                walletAddress.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
+                walletAddress.title = this.account;
+                walletAddress.onclick = () => {
+                    navigator.clipboard.writeText(this.account).then(() => this.showSuccess('Address copied to clipboard!'));
+                };
                 walletAddress.style.display = '';
             }
+            if (walletNetwork) {
+                walletNetwork.textContent = networkName;
+                walletNetwork.style.display = '';
+            }
             if (aiusBalance) aiusBalance.style.display = '';
-            if (disconnectBtn) disconnectBtn.style.display = 'inline-flex';
+            if (disconnectBtn) disconnectBtn.style.display = 'flex';
             // Mobile UI
             if (connectBtnMobile) connectBtnMobile.style.display = 'none';
             if (walletConnectedMobile) walletConnectedMobile.style.display = 'flex';
             if (walletAddressMobile) {
-                walletAddressMobile.innerHTML = `
-                    <div class="flex flex-col cursor-pointer hover:bg-[#334155] transition-colors duration-200 rounded px-2 py-1" onclick="navigator.clipboard.writeText('${this.account}').then(() => window.metaMaskManager.showSuccess('Address copied to clipboard!'))">
-                        <span class="text-textmuted text-sm font-mono">${this.account.slice(0, 6)}...${this.account.slice(-4)}</span>
-                        <span class="text-xs text-textmuted">${networkName}</span>
-                    </div>
-                `;
+                walletAddressMobile.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
+                walletAddressMobile.title = this.account;
+                walletAddressMobile.onclick = () => {
+                    navigator.clipboard.writeText(this.account).then(() => this.showSuccess('Address copied to clipboard!'));
+                };
                 walletAddressMobile.style.display = '';
             }
             if (aiusBalanceMobile) aiusBalanceMobile.style.display = '';

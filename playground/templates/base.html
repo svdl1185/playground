@@ -80,14 +80,17 @@
           <!-- Desktop Wallet Section -->
           <div class="hidden md:flex items-center gap-3">
             <!-- Connected State -->
-            <div id="wallet-connected-container" class="flex items-center gap-2" style="display: none;">
-              <div class="flex items-center gap-2 bg-[#232b45] px-3 py-2 rounded-lg border border-[#334155]">
-                <div class="wallet-status-indicator"></div>
-                <span id="wallet-address" class="text-textmuted text-sm font-mono"></span>
+            <div id="wallet-connected-container" class="flex items-center gap-4 bg-[#232b45]/80 border border-[#334155] shadow-xl rounded-2xl px-6 py-3 transition-all duration-300" style="display: none;">
+              <div class="flex flex-col items-start justify-center">
+                <div class="flex items-center gap-2">
+                  <span class="text-white text-lg font-mono tracking-wider select-all cursor-pointer hover:text-primary transition" id="wallet-address"></span>
+                </div>
+                <span class="text-xs text-textmuted mt-1" id="wallet-network"></span>
               </div>
-              <div id="aius-balance" class="nav-wallet-balance" style="display: none;"></div>
-              <button id="disconnect-wallet-btn" class="bg-red-600/20 text-red-400 px-3 py-2 rounded-lg text-xs font-semibold border border-red-500/30 hover:bg-red-600/30 transition-all duration-200" title="Disconnect Wallet">
+              <div id="aius-balance" class="ml-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 px-4 py-2 rounded-full text-base font-bold border border-yellow-500/30 shadow-sm flex items-center" style="display: none;"></div>
+              <button id="disconnect-wallet-btn" class="ml-6 w-10 h-10 flex items-center justify-center rounded-full border border-red-500/30 bg-red-600/10 text-red-400 hover:bg-red-600/30 hover:text-white transition-all duration-200 shadow group relative" title="Disconnect Wallet">
                 <i class="fas fa-sign-out-alt"></i>
+                <span class="absolute left-1/2 -translate-x-1/2 top-12 text-xs bg-red-700 text-white px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition pointer-events-none">Disconnect</span>
               </button>
             </div>
             <!-- Connect Button -->
