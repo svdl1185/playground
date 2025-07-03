@@ -41,15 +41,24 @@
       .nav-link-active {
         @apply text-white bg-primary/20;
       }
-      .nav-wallet-btn {
-        @apply bg-primary text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-secondary transition flex items-center gap-2;
+      .nav-wallet-connected {
+        @apply bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all duration-300 flex items-center gap-2;
       }
       .nav-wallet-address {
-        @apply bg-[#232b45] text-textmuted px-4 py-2 rounded-lg text-xs font-mono;
+        @apply bg-[#232b45] text-textmuted px-3 py-2 rounded-lg text-xs font-mono border border-[#334155];
+      }
+      .nav-wallet-balance {
+        @apply bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 px-3 py-2 rounded-lg text-xs font-semibold border border-yellow-500/30;
       }
       .nav-mobile-menu {
         background: rgba(15,23,42,0.98);
         backdrop-filter: blur(24px);
+      }
+      .wallet-status-indicator {
+        @apply w-2 h-2 rounded-full bg-green-400 animate-pulse;
+      }
+      .wallet-dropdown {
+        @apply absolute top-full right-0 mt-2 w-64 bg-cardbg border border-[#334155] rounded-xl shadow-xl backdrop-blur-lg z-50;
       }
     </style>
 </head>
@@ -68,14 +77,34 @@
         </div>
         <!-- Wallet/Actions -->
         <div class="flex items-center gap-3">
-          <span id="wallet-address" class="nav-wallet-address" style="display: none;"></span>
-          <span id="aius-balance" class="nav-wallet-address ml-2" style="display: none;"></span>
-          <button id="disconnect-wallet-btn" class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow hover:bg-red-700 transition" style="display: none;">
-            <i class="fas fa-sign-out-alt"></i> Disconnect
-          </button>
-          <button id="connect-wallet-btn" class="nav-wallet-btn">
-            <i class="fas fa-wallet"></i> Connect Wallet
-          </button>
+          <!-- Desktop Wallet Section -->
+          <div class="hidden md:flex items-center gap-3">
+            <!-- Connected State -->
+            <div id="wallet-connected-container" class="flex items-center gap-2" style="display: none;">
+              <div class="flex items-center gap-2 bg-[#232b45] px-3 py-2 rounded-lg border border-[#334155]">
+                <div class="wallet-status-indicator"></div>
+                <span id="wallet-address" class="text-textmuted text-sm font-mono"></span>
+              </div>
+              <div id="aius-balance" class="nav-wallet-balance" style="display: none;"></div>
+              <button id="disconnect-wallet-btn" class="bg-red-600/20 text-red-400 px-3 py-2 rounded-lg text-xs font-semibold border border-red-500/30 hover:bg-red-600/30 transition-all duration-200" title="Disconnect Wallet">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
+            </div>
+            <!-- Connect Button -->
+            <button id="connect-wallet-btn"
+              class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 hover:scale-105">
+              <i class="fas fa-wallet"></i> Connect Wallet
+            </button>
+          </div>
+          
+          <!-- Mobile Wallet Section -->
+          <div class="md:hidden flex items-center gap-2">
+            <button id="connect-wallet-btn-mobile"
+              class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 hover:scale-105">
+              <i class="fas fa-wallet"></i> Connect
+            </button>
+          </div>
+          
           <!-- Hamburger for mobile -->
           <button id="nav-mobile-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#232b45] transition">
             <i class="fas fa-bars text-xl"></i>
@@ -86,14 +115,18 @@
       <div id="nav-mobile-menu" class="nav-mobile-menu fixed top-16 left-0 w-full py-6 px-6 flex flex-col gap-4 md:hidden hidden z-40">
         <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-link-active{% endif %}">Home</a>
         <a href="{% url 'playground' %}" class="nav-link {% if request.resolver_match.url_name == 'playground' %}nav-link-active{% endif %}">Playground</a>
-        <span id="wallet-address-mobile" class="nav-wallet-address w-full justify-center" style="display: none;"></span>
-        <span id="aius-balance-mobile" class="nav-wallet-address w-full justify-center ml-2" style="display: none;"></span>
-        <button id="disconnect-wallet-btn-mobile" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-red-700 transition w-full justify-center" style="display: none;">
-          <i class="fas fa-sign-out-alt"></i> Disconnect Wallet
-        </button>
-        <button id="connect-wallet-btn-mobile" class="nav-wallet-btn w-full justify-center">
-          <i class="fas fa-wallet"></i> Connect Wallet
-        </button>
+        
+        <!-- Mobile Connected State -->
+        <div id="wallet-connected-mobile" class="flex flex-col gap-3" style="display: none;">
+          <div class="flex items-center gap-2 bg-[#232b45] px-4 py-3 rounded-lg border border-[#334155]">
+            <div class="wallet-status-indicator"></div>
+            <span id="wallet-address-mobile" class="text-textmuted text-sm font-mono"></span>
+          </div>
+          <div id="aius-balance-mobile" class="nav-wallet-balance w-full justify-center" style="display: none;"></div>
+          <button id="disconnect-wallet-btn-mobile" class="bg-red-600/20 text-red-400 px-4 py-3 rounded-lg text-sm font-semibold border border-red-500/30 hover:bg-red-600/30 transition-all duration-200 w-full justify-center">
+            <i class="fas fa-sign-out-alt"></i> Disconnect Wallet
+          </button>
+        </div>
       </div>
       <script>
         const navToggle = document.getElementById('nav-mobile-toggle');
